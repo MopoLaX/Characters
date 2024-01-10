@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Reset some default styles for better consistency */
+        body, h1, h2, h3, p, ul, li {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Common styles for both light and dark modes */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5; /* Light background color */
+            color: #333; /* Default text color */
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0;
+            overflow-x: hidden; /* Hide horizontal scrollbar */
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #111;
+            color: #fff;
+        }
+
+        /* Container for the entire page content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Full-width header styles */
+        .header {
+            background-color: #14213D; /* Dark blue background color */
+            color: #fff;
+            padding: 20px 0; /* Increased padding */
+            text-align: center;
+            width: 100%; /* Make the header full-width */
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .nav {
+            list-style: none;
+            display: none; /* Initially hide the navigation */
+        }
+
+        .nav li {
+            margin: 0 15px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .nav a:hover {
+            color: #00909E; /* Light blue color on hover */
+        }
+
+        /* Hamburger button for small screens */
+        .hamburger {
+            display: block;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 30px;
+            height: 3px;
+            background-color: #fff;
+            margin-bottom: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Sign In and Log In buttons */
+        .auth-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .auth-buttons button {
+            background-color: #00909E;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #1e3b3c;
+        }
+
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 200px;
+            background-color: hwb(0 24% 76%); /* Red color when off */
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 20px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            transform: translateX(0); /* Initial state */
+            z-index: 1000;
+        }
+
+        .dark-mode-toggle.on {
+            background-color: #77DD77; /* Green color when on */
+            transform: translateX(40px); /* Adjust based on the toggle's width */
+        }
+
+        /* Popup form styles */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1001; /* Above the dark mode toggle */
+        }
+
+        .popup label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .popup input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .popup button {
+            background-color: #00909E;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .popup button:hover {
+            background-color: #00777B;
+        }
+
+        /* Dark overlay for the background when the popup is active */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+    </style>
+    <script>
+        // Toggle dark mode
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            darkModeToggle.classList.toggle('on', body.classList.contains('dark-mode'));
+        }
+
+        // Toggle hidden navigation
+        function toggleNav() {
+            const nav = document.querySelector('.nav');
+            nav.style.display = (nav.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Open Sign In form
+        function openSignInForm() {
+            const signInPopup = document.getElementById('signInPopup');
+            const overlay = document.getElementById('overlay');
+            signInPopup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        // Open Log In form
+        function openLogInForm() {
+            const logInPopup = document.getElementById('logInPopup');
+            const overlay = document.getElementById('overlay');
+            logInPopup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        // Close the currently active popup
+        function closePopup() {
+            const popups = document.querySelectorAll('.popup');
+            const overlay = document.getElementById('overlay');
+            popups.forEach(popup => (popup.style.display = 'none'));
+            overlay.style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <button class="hamburger" onclick="toggleNav()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+    <div class="header">
+        <h1>Your Website Name</h1>
+        <div class="auth-buttons">
+            <button onclick="openSignInForm()">Sign In</button>
+            <button onclick="openLogInForm()">Log In</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="banner">
+            <h1>Your Website Name</h1>
+        </div>
+        <div class="section">
+            <h2>About Us</h2>
+            <p>Your website's description goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis lorem eu lorem consequat ultrices. Ut quis nisi vitae leo tincidunt mattis.</p>
+        </div>
+        <div class="section">
+            <h2>Our Products and Services</h2>
+            <!-- Your product and service information goes here -->
+        </div>
+    </div>
+
+    <!-- Sign In Popup -->
+    <div id="signInPopup" class="popup">
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="userId" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <button onclick="closePopup()">Close</button>
+        <button onclick="alert('Implement Sign In logic')">Sign In</button>
+    </div>
+
+    <!-- Log In Popup -->
+    <div id="logInPopup" class="popup">
+        <label for="logInUserId">User ID:</label>
+        <input type="text" id="logInUserId" name="logInUserId" required>
+
+        <label for="logInPassword">Password:</label>
+        <input type="password" id="logInPassword" name="logInPassword" required>
+
+        <button onclick="closePopup()">Close</button>
+        <button onclick="alert('Implement Log In logic')">Log In</button>
+    </div>
+
+    <!-- Dark overlay for background -->
+    <div id="overlay" class="overlay" onclick="closePopup()"></div>
+</body>
+</html>
+
